@@ -1,4 +1,4 @@
-<form action="updateUser.php" method="POST">
+<form action="updateUser.php" method="PUT">
     <input type="hidden" name="darkMode" value="0">
     <label>Id: <input type="text" name="id"></label>
     <label>First Name: <input type="text" name="firstName"></label>

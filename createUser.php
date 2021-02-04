@@ -41,6 +41,25 @@ if (count($blankFields)) {
         'error_message' => 'The following fields were left blank: ' . implode(', ', $blankFields)
     ]));
 }
+$firstNameLength = strlen($_POST['firstName']);
+$lastNameLength = strlen($_POST['lastName']);
+$userNameLength = strlen($_POST['userName']);
+$errors = [];
+if (!($firstNameLength >= 1 && $firstNameLength <= 50)) {
+    $errors[] = 'First name length was out of range (length must be greater or equal to 1 and less than or equal 50 characters)';
+}
+if (!($lastNameLength >= 1 && $lastNameLength <= 50)) {
+    $errors[] = 'Last name length was out of range (length must be greater or equal to 1 and less than or equal to 50 characters)';
+}
+if (!($userNameLength >= 1 && $userNameLength <= 50)) {
+    $errors[] = 'Username length was out of range (length must be greater than or equal to 6 and less than or equal to 50 characters)';
+}
+if (count($errors)) {
+    die(json_encode([
+        'error_message' => 'There were errors creating the user account',
+        'list_of_errors' => $errors
+    ]));
+}
 $retval = $dbConn->insert('users', [
     'firstName' => $_POST['firstName'],
     'lastName' => $_POST['lastName'],

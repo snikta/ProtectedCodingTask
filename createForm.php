@@ -1,4 +1,4 @@
-<form action="createUser.php" method="POST">
+<form action="user.php" method="POST">
     <input type="hidden" name="darkMode" value="0">
     <label>First Name: <input type="text" name="firstName"></label>
     <label>Last Name: <input type="text" name="lastName"></label>
