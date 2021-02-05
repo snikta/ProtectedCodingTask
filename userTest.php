@@ -47,6 +47,7 @@ final class UserTest extends TestCase
             'dateCreated' => time()
         ];
         require_once('createUser.php');
+        createUser($requestData, $dbConn);
         $insert_id = $this->testInstance->conn->insert_id;
         $this->assertTrue(check_data_equality($this, $insert_id, 'users', $requestData));
     }

@@ -48,6 +48,7 @@ switch ($requestMethod) {
             $requestData[$key] = $value;
         }
         require_once('createUser.php');
+        createUser($requestData, $dbConn);
         break;
     case 'DELETE':
         $myEntireBody = file_get_contents('php://input'); //Be aware that the stream can only be read once
