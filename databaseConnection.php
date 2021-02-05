@@ -39,19 +39,25 @@ class DatabaseConnection {
         return $this->conn->query($sql);
     }
 
-    private function sanitiseData($data) {
+    public function sanitiseData($data, $returnAssocArray = false) {
+        $assocArray = [];
         $fieldNames = [];
         $fieldValues = [];
         foreach ($data as $fieldName => $fieldValue) {
-            $fieldType = $this->fieldTypes[$fieldName];
-            $fieldNames[] = $this->conn->real_escape_string($fieldName);
-            if ($fieldType == 'INT' || $fieldType == 'TINYINT') {
-                $fieldValues[] = (int) $this->conn->real_escape_string($fieldValue);
+            $fieldType = $this->getFieldType($fieldName);
+            $fieldName = $this->conn->real_escape_string($fieldName);
+            $fieldNames[] = $fieldName;
+            if ($fieldType == 'INT') {
+                $fieldValue = (int) $this->conn->real_escape_string($fieldValue);
             } else if ($fieldType == 'VARCHAR') {
-                $fieldValues[] = '\'' . $this->conn->real_escape_string($fieldValue) . '\'';
+                $fieldValue = '\'' . $this->conn->real_escape_string($fieldValue) . '\'';
+            } else if ($fieldType == 'TINYINT') {
+                $fieldValue = (bool) $fieldValue;
             }
+            $fieldValues[] = $fieldValue;
+            $assocArray[$fieldName] = $fieldValue;
         }
-        return [$fieldNames, $fieldValues];
+        return $returnAssocArray ? $assocArray : [$fieldNames, $fieldValues];
     }
 
     public function insert($tableName, $data) {

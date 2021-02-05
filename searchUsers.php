@@ -13,9 +13,9 @@ if ($searchField != 'firstName' && $searchField != 'lastName' && $searchField !=
 $query = $dbConn->conn->real_escape_string($_GET['query']);
 $users = $dbConn->query('SELECT * FROM users WHERE ' . $searchField . ' LIKE \'%' . $query . '%\'');
 $results = [];
-$resultCount = mysqli_num_rows($users);
+$resultCount = $users->num_rows;
 if ($resultCount) {
-    while ($user = mysqli_fetch_object($users)) {
+    while ($user = $users->fetch_object()) {
         $results[] = $user;
     }
     echo json_encode($results);

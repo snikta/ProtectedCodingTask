@@ -12,7 +12,7 @@ if (!isset($put['id'])) {
 }
 $userId = intval($put['id']);
 $user = $dbConn->query('SELECT * FROM users WHERE id = ' . $userId);
-if ($user && ($user = mysqli_fetch_object($user))) {
+if ($user && ($user = $user->fetch_object())) {
     $retval = $dbConn->query('UPDATE users SET darkMode = NOT darkMode WHERE id = ' . $userId);
     if ($retval) {
         echo json_encode(['success_message' => 'The darkMode value was successfully toggled ' . ($user->darkMode == 1 ? 'OFF' : 'ON')]); // $user->darkMode is old value

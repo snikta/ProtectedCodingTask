@@ -2,9 +2,9 @@
 require_once('databaseConnection.php');
 $users = $dbConn->query('SELECT * FROM users WHERE id > 0');
 $results = [];
-$resultCount = mysqli_num_rows($users);
+$resultCount = $users->num_rows;
 if ($resultCount) {
-    while ($user = mysqli_fetch_object($users)) {
+    while ($user = $users->fetch_object()) {
         $userData = [];
         foreach ($user as $fieldName => $fieldValue) {
             $fieldType = $dbConn->getFieldType($fieldName);
