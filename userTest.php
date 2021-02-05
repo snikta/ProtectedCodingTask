@@ -56,7 +56,7 @@ final class UserTest extends TestCase
     public function test_update_user() {
         $this->test_connect();
         $dbConn = &$this->testInstance;
-        $id = 2;
+        $id = 25;
         $requestMethod = 'PUT';
         $requestData = [
             'id' => $id,
@@ -74,7 +74,7 @@ final class UserTest extends TestCase
     public function test_delete_user() {
         $this->test_connect();
         $dbConn = &$this->testInstance;
-        $id = 54;
+        $id = 26;
         $requestMethod = 'DELETE';
         $requestData = [
             'id' => $id,
@@ -87,7 +87,7 @@ final class UserTest extends TestCase
     public function test_toggle_dark_mode() {
         $this->test_connect();
         $dbConn = &$this->testInstance;
-        $id = 42;
+        $id = 24;
         $requestMethod = 'PUT';
         $requestData = [
             'id' => $id
