@@ -2,10 +2,11 @@
 use PHPUnit\Framework\TestCase;
 
 require_once('databaseConnection.php');
+require_once('check_data_equality.php');
 
 final class DatabaseConnectionTest extends TestCase
 {
-    private $testInstance;
+    public $testInstance;
 
     /** @test */
     public function test_construct() {
@@ -34,30 +35,9 @@ final class DatabaseConnectionTest extends TestCase
             'darkMode' => 'TINYINT'
         ]);
         $this->assertInstanceOf(DatabaseConnection::class, $dbConn);
+        $this->assertFalse((bool) $dbConn->conn->connect_errno);
 
         $this->testInstance = $dbConn;
-    }
-
-    private function check_data_equality($row_id, $tableName, $oldData) {
-        $sanitisedTableName = $this->testInstance->conn->real_escape_string($tableName);
-        $sanitisedOldData = $this->testInstance->sanitiseData($oldData, true);
-        $query = $this->testInstance->query('SELECT * FROM ' . $sanitisedTableName . ' WHERE id = ' . $row_id);
-        if ($query && $query->num_rows) {
-            $query = $query->fetch_object();
-            $sanitisedNewData = $this->testInstance->sanitiseData($query, true);
-            foreach ($sanitisedNewData as $fieldName => $fieldValue) {
-                if (array_key_exists($fieldName, $sanitisedOldData)) {
-                    $cmp = $fieldValue == $sanitisedOldData[$fieldName];
-                    $cmp_strict = $fieldValue === $sanitisedOldData[$fieldName];
-                    $this->assertEquals($sanitisedOldData[$fieldName], $fieldValue);
-                    $this->assertTrue($cmp_strict);
-                    if (!$cmp_strict) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
     }
 
     /** @test */
@@ -76,7 +56,7 @@ final class DatabaseConnectionTest extends TestCase
         $result = $this->testInstance->insert($tableName, $data);
         if ($result) {
             $insert_id = $this->testInstance->conn->insert_id;
-            $this->check_data_equality($insert_id, $tableName, $data);
+            check_data_equality($this, $insert_id, $tableName, $data);
         } else {
             echo $this->testInstance->conn->error;
         }
@@ -99,7 +79,7 @@ final class DatabaseConnectionTest extends TestCase
         $whereParams = ['id' => $id];
         $result = $this->testInstance->update($tableName, $data, $whereParams);
         if ($result) {
-            $this->check_data_equality($id, $tableName, $data);
+            $this->assertTrue(check_data_equality($this, $id, $tableName, $data));
         } else {
             echo $this->testInstance->conn->error;
         }

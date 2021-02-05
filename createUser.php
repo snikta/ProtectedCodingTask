@@ -1,13 +1,13 @@
 <?php
 require_once('databaseConnection.php');
-if (!isset($_POST)) {
+if (!isset($requestData)) {
     die(json_encode(['error_message' => 'No data supplied']));
 }
 $supplied = [
-    'firstName' => isset($_POST['firstName']),
-    'lastName' => isset($_POST['lastName']),
-    'userName' => isset($_POST['userName']),
-    'darkMode' => isset($_POST['darkMode'])
+    'firstName' => isset($requestData['firstName']),
+    'lastName' => isset($requestData['lastName']),
+    'userName' => isset($requestData['userName']),
+    'darkMode' => isset($requestData['darkMode'])
 ];
 $absentFields = [];
 foreach ($supplied as $fieldName => $wasSupplied) {
@@ -21,10 +21,10 @@ if (count($absentFields)) {
     ]));
 }
 $values = [
-    'firstName' => $_POST['firstName'],
-    'lastName' => $_POST['lastName'],
-    'userName' => $_POST['userName'],
-    'darkMode' => $_POST['darkMode']
+    'firstName' => $requestData['firstName'],
+    'lastName' => $requestData['lastName'],
+    'userName' => $requestData['userName'],
+    'darkMode' => $requestData['darkMode']
 ];
 $blankFields = [];
 foreach ($values as $fieldName => $fieldValue) {
@@ -41,9 +41,9 @@ if (count($blankFields)) {
         'error_message' => 'The following fields were left blank: ' . implode(', ', $blankFields)
     ]));
 }
-$firstNameLength = strlen($_POST['firstName']);
-$lastNameLength = strlen($_POST['lastName']);
-$userNameLength = strlen($_POST['userName']);
+$firstNameLength = strlen($requestData['firstName']);
+$lastNameLength = strlen($requestData['lastName']);
+$userNameLength = strlen($requestData['userName']);
 $errors = [];
 if (!($firstNameLength >= 1 && $firstNameLength <= 50)) {
     $errors[] = 'First name length was out of range (length must be greater or equal to 1 and less than or equal 50 characters)';
@@ -61,11 +61,11 @@ if (count($errors)) {
     ]));
 }
 $retval = $dbConn->insert('users', [
-    'firstName' => $_POST['firstName'],
-    'lastName' => $_POST['lastName'],
-    'userName' => $_POST['userName'],
+    'firstName' => $requestData['firstName'],
+    'lastName' => $requestData['lastName'],
+    'userName' => $requestData['userName'],
     'dateCreated' => time(),
-    'darkMode' => $_POST['darkMode']
+    'darkMode' => $requestData['darkMode']
 ]);
 if ($retval) {
     echo json_encode([

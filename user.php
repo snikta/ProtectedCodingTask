@@ -9,11 +9,14 @@ function removeIfEmpty($str) {
     return preg_replace('/\s+/', '', $str) != '';
 }
 
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$uri = array_filter(explode( '/', $uri ), "removeIfEmpty");
-$uriCount = count($uri);
+if (isset($_SERVER['REQUEST_URI'])) {
+    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $uri = array_filter(explode( '/', $uri ), "removeIfEmpty");
+    $uriCount = count($uri);
+}
 
-$requestMethod = $_SERVER["REQUEST_METHOD"];
+$requestMethod = isset($_SERVER['REQUEST_METHOD']) ? $_SERVER["REQUEST_METHOD"] : $requestMethod;
+
 switch ($requestMethod) {
     case 'GET':
         if ($uriCount == 2) {
@@ -26,16 +29,22 @@ switch ($requestMethod) {
         }
         break;
     case 'PUT':
-        if ($uriCount == 4) {
+        if (isset($uriCount) && $uriCount == 4) {
             $lastPart = strtolower($uri[4]);
             if ($lastPart == 'toggledarkmode') {
                 require_once('toggleDarkMode.php');
             }
         } else {
+            $myEntireBody = file_get_contents('php://input');
+            parse_str($myEntireBody, $requestData);
             require_once('updateUser.php');
         }
         break;
     case 'POST':
+        $requestData = [];
+        foreach ($_POST as $key => $value) {
+            $requestData[$key] = $value;
+        }
         require_once('createUser.php');
         break;
     case 'DELETE':
