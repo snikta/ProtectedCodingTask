@@ -52,7 +52,7 @@ class DatabaseConnection {
             } else if ($fieldType == 'VARCHAR') {
                 $fieldValue = '\'' . $this->conn->real_escape_string($fieldValue) . '\'';
             } else if ($fieldType == 'TINYINT') {
-                $fieldValue = (bool) $fieldValue;
+                $fieldValue = (int) (bool) $fieldValue;
             }
             $fieldValues[] = $fieldValue;
             $assocArray[$fieldName] = $fieldValue;
