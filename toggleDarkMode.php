@@ -1,16 +1,12 @@
 <?php
 require_once('databaseConnection.php');
-if ($_SERVER['REQUEST_METHOD'] === 'PUT') { 
-    $myEntireBody = file_get_contents('php://input'); //Be aware that the stream can only be read once
-    parse_str($myEntireBody, $put);
-}
-if (!isset($put)) {
+if (!isset($requestData)) {
     die(json_encode(['error_message' => 'No data supplied;']));
 }
-if (!isset($put['id'])) {
+if (!isset($requestData['id'])) {
     die(json_encode(['error_message' => 'A user id was not supplied;']));
 }
-$userId = intval($put['id']);
+$userId = intval($requestData['id']);
 $user = $dbConn->query('SELECT * FROM users WHERE id = ' . $userId);
 if ($user && ($user = $user->fetch_object())) {
     $retval = $dbConn->query('UPDATE users SET darkMode = NOT darkMode WHERE id = ' . $userId);

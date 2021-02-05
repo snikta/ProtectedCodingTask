@@ -2,7 +2,6 @@
 use PHPUnit\Framework\TestCase;
 
 require('databaseConnection.php');
-require_once('user.php');
 require_once('check_data_equality.php');
 
 final class UserTest extends TestCase
@@ -34,6 +33,7 @@ final class UserTest extends TestCase
         $this->assertFalse((bool) $this->testInstance->conn->connect_errno);
     }
 
+    
     /** @test */
     public function test_create_user() {
         $this->test_connect();
@@ -67,5 +67,30 @@ final class UserTest extends TestCase
         ];
         require_once('updateUser.php');
         $this->assertTrue(check_data_equality($this, $id, 'users', $requestData));
+    }
+
+    /** @test */
+    public function test_delete_user() {
+        $this->test_connect();
+        $dbConn = &$this->testInstance;
+        $id = 54;
+        $requestMethod = 'DELETE';
+        $requestData = [
+            'id' => $id,
+            'confirm' => 'yes'
+        ];
+        require_once('deleteUser.php');
+    }
+
+    /** @test */
+    public function test_toggle_dark_mode() {
+        $this->test_connect();
+        $dbConn = &$this->testInstance;
+        $id = 42;
+        $requestMethod = 'PUT';
+        $requestData = [
+            'id' => $id
+        ];
+        require_once('toggleDarkMode.php');
     }
 }

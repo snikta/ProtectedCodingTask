@@ -32,6 +32,8 @@ switch ($requestMethod) {
         if (isset($uriCount) && $uriCount == 4) {
             $lastPart = strtolower($uri[4]);
             if ($lastPart == 'toggledarkmode') {
+                $myEntireBody = file_get_contents('php://input'); //Be aware that the stream can only be read once
+                parse_str($myEntireBody, $requestData);
                 require_once('toggleDarkMode.php');
             }
         } else {
@@ -48,6 +50,9 @@ switch ($requestMethod) {
         require_once('createUser.php');
         break;
     case 'DELETE':
+        $myEntireBody = file_get_contents('php://input'); //Be aware that the stream can only be read once
+        parse_str($myEntireBody, $requestData);
+        $requestData['id'] = $_REQUEST['id'];
         require_once('deleteUser.php');
         break;
 }
