@@ -37,7 +37,7 @@ final class UserTest extends TestCase
     public function test_list_users() {
         $this->test_connect();
         $dbConn = &$this->testInstance;
-        $expectedUsers = json_decode(file_get_contents('users.json'));
+        $expectedUsers = json_decode(file_get_contents('prefilled.json'));
         require_once('listUsers.php');
         $decodedOutput = json_decode($output);
         $i = 0;
@@ -51,6 +51,69 @@ final class UserTest extends TestCase
             }
             $i++;
         }
+    }
+
+    /** @test */
+    public function test_search_by_lastname() {
+        $this->test_connect();
+        $dbConn = &$this->testInstance;
+        require_once('searchUsers.php');
+
+        $requestData = [
+            'searchField' => 'lastName',
+            'query' => 'Simpson'
+        ];
+        list($output, $searchResultCount) = searchUsers($requestData, $dbConn);
+        $this->assertTrue($searchResultCount > 0);
+
+        $requestData = [
+            'searchField' => 'lastName',
+            'query' => 'Duke'
+        ];
+        list($output, $searchResultCount) = searchUsers($requestData, $dbConn);
+        $this->assertFalse($searchResultCount > 0);
+    }
+
+    /** @test */
+    public function test_search_by_firstname() {
+        $this->test_connect();
+        $dbConn = &$this->testInstance;
+        require_once('searchUsers.php');
+
+        $requestData = [
+            'searchField' => 'firstName',
+            'query' => 'Buzz'
+        ];
+        list($output, $searchResultCount) = searchUsers($requestData, $dbConn);
+        $this->assertTrue($searchResultCount > 0);
+
+        $requestData = [
+            'searchField' => 'firstName',
+            'query' => 'Harrison'
+        ];
+        list($output, $searchResultCount) = searchUsers($requestData, $dbConn);
+        $this->assertFalse($searchResultCount > 0);
+    }
+
+    /** @test */
+    public function test_search_by_username() {
+        $this->test_connect();
+        $dbConn = &$this->testInstance;
+        require_once('searchUsers.php');
+
+        $requestData = [
+            'searchField' => 'userName',
+            'query' => 'NA_armstrong'
+        ];
+        list($output, $searchResultCount) = searchUsers($requestData, $dbConn);
+        $this->assertTrue($searchResultCount > 0);
+        
+        $requestData = [
+            'searchField' => 'userName',
+            'query' => 'gene.cernan'
+        ];
+        list($output, $searchResultCount) = searchUsers($requestData, $dbConn);
+        $this->assertFalse($searchResultCount > 0);
     }
     
     /** @test */
@@ -75,7 +138,7 @@ final class UserTest extends TestCase
     public function test_update_user() {
         $this->test_connect();
         $dbConn = &$this->testInstance;
-        $id = 25;
+        $id = 1;
         $requestMethod = 'PUT';
         $requestData = [
             'id' => $id,
@@ -93,7 +156,7 @@ final class UserTest extends TestCase
     public function test_delete_user() {
         $this->test_connect();
         $dbConn = &$this->testInstance;
-        $id = 27;
+        $id = 2;
         $requestMethod = 'DELETE';
         $requestData = [
             'id' => $id,
@@ -101,16 +164,16 @@ final class UserTest extends TestCase
         ];
         require_once('deleteUser.php');
         $result = $dbConn->conn->query('SELECT * FROM users WHERE id = ' . intval($id));
-        $this->assertFalse($result && $result->num_rows);
+        $this->assertFalse($result && $result->num_rows > 0);
     }
 
     /** @test */
     public function test_toggle_dark_mode() {
         $this->test_connect();
         $dbConn = &$this->testInstance;
-        $id = 24;
+        $id = 3;
         $result = $dbConn->conn->query('SELECT * FROM users WHERE id = ' . intval($id));
-        $this->assertTrue($result && $result->num_rows);
+        $this->assertTrue($result && $result->num_rows > 0);
         $resultObj = $result->fetch_object();
         $prevValue = (bool) $resultObj->darkMode;
         $requestMethod = 'PUT';
@@ -119,7 +182,7 @@ final class UserTest extends TestCase
         ];
         require_once('toggleDarkMode.php');
         $result = $dbConn->conn->query('SELECT * FROM users WHERE id = ' . intval($id));
-        $this->assertTrue($result && $result->num_rows);
+        $this->assertTrue($result && $result->num_rows > 0);
         $resultObj = $result->fetch_object();
         $newValue = (bool) $resultObj->darkMode;
         $this->assertTrue($prevValue === !$newValue);
