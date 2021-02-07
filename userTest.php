@@ -33,6 +33,25 @@ final class UserTest extends TestCase
         $this->assertFalse((bool) $this->testInstance->conn->connect_errno);
     }
 
+    /** @test */
+    public function test_list_users() {
+        $this->test_connect();
+        $dbConn = &$this->testInstance;
+        $expectedUsers = json_decode(file_get_contents('users.json'));
+        require_once('listUsers.php');
+        $decodedOutput = json_decode($output);
+        $i = 0;
+        foreach($decodedOutput as $decodedUser) {
+            $decodedUser = (array) $decodedUser;
+            $expectedUser = (array) $expectedUsers[$i];
+            foreach($decodedUser as $key => $value) {
+                if (array_key_exists($key, $expectedUser)) {
+                    $this->assertTrue($value === $expectedUser[$key]);
+                }
+            }
+            $i++;
+        }
+    }
     
     /** @test */
     public function test_create_user() {
@@ -74,13 +93,15 @@ final class UserTest extends TestCase
     public function test_delete_user() {
         $this->test_connect();
         $dbConn = &$this->testInstance;
-        $id = 26;
+        $id = 27;
         $requestMethod = 'DELETE';
         $requestData = [
             'id' => $id,
             'confirm' => 'yes'
         ];
         require_once('deleteUser.php');
+        $result = $dbConn->conn->query('SELECT * FROM users WHERE id = ' . intval($id));
+        $this->assertFalse($result && $result->num_rows);
     }
 
     /** @test */
@@ -88,10 +109,19 @@ final class UserTest extends TestCase
         $this->test_connect();
         $dbConn = &$this->testInstance;
         $id = 24;
+        $result = $dbConn->conn->query('SELECT * FROM users WHERE id = ' . intval($id));
+        $this->assertTrue($result && $result->num_rows);
+        $resultObj = $result->fetch_object();
+        $prevValue = (bool) $resultObj->darkMode;
         $requestMethod = 'PUT';
         $requestData = [
             'id' => $id
         ];
         require_once('toggleDarkMode.php');
+        $result = $dbConn->conn->query('SELECT * FROM users WHERE id = ' . intval($id));
+        $this->assertTrue($result && $result->num_rows);
+        $resultObj = $result->fetch_object();
+        $newValue = (bool) $resultObj->darkMode;
+        $this->assertTrue($prevValue === !$newValue);
     }
 }

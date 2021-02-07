@@ -8,44 +8,8 @@ if ($result && $result->num_rows) {
     $dbConn->conn->query($createTableQuery);
 }
 require_once('createUser.php');
-$usersToCreate = [
-    [
-        'firstName' => 'Homer J.',
-        'lastName' => 'Simpson',
-        'userName' => 'H.J.Simpson',
-        'darkMode' => 1,
-        'dateCreated' => time()
-    ],
-    [
-        'firstName' => 'Lisa Marie',
-        'lastName' => 'Simpson',
-        'userName' => 'L.Simpson',
-        'darkMode' => 0,
-        'dateCreated' => time()
-    ],
-    [
-        'firstName' => 'Neil Alden',
-        'lastName' => 'Armstrong',
-        'userName' => 'NA_armstrong',
-        'darkMode' => 0,
-        'dateCreated' => time()
-    ],
-    [
-        'firstName' => 'Edwin "Buzz"',
-        'lastName' => 'Aldrin',
-        'userName' => 'the_real_buzz',
-        'darkMode' => 1,
-        'dateCreated' => time()
-    ],
-    [
-        'firstName' => 'Margaret "Maggie"',
-        'lastName' => 'Simpson',
-        'userName' => 'maggie__simpson',
-        'darkMode' => 1,
-        'dateCreated' => time()
-    ]
-];
+$usersToCreate = json_decode(file_get_contents('users.json'));
 foreach ($usersToCreate as $userData) {
-    createUser($userData, $dbConn);
+    createUser((array) $userData, $dbConn);
 }
 ?>

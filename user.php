@@ -21,6 +21,7 @@ switch ($requestMethod) {
     case 'GET':
         if ($uriCount == 2) {
             require_once('listUsers.php');
+            echo $output;
         } else if ($uriCount == 3) {
             require_once('getUser.php');
         } else if ($uriCount == 4) {

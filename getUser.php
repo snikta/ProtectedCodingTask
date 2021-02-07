@@ -8,7 +8,7 @@ if (!isset($_GET, $_GET['id'])) {
     if ($user && ($user = $user->fetch_object())) {
         echo json_encode($user);
     } else {
-        ech json_encode(['error_message' => 'Could not find user in database']);
+        echo json_encode(['error_message' => 'Could not find user in database']);
     }
 }
 ?>

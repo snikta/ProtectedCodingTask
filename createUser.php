@@ -70,7 +70,8 @@ function createUser($requestData, &$dbConn) {
                     'firstName' => $requestData['firstName'],
                     'lastName' => $requestData['lastName'],
                     'userName' => $requestData['userName'],
-                    'dateCreated' => time(),
+                    'dateCreated' => isset($requestData['dateCreated']) ?
+                        $requestData['dateCreated'] : time(),
                     'darkMode' => $requestData['darkMode']
                 ]);
                 if ($retval) {

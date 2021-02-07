@@ -22,9 +22,9 @@ if ($resultCount) {
         }
         $results[] = $userData;
     }
-    echo json_encode($results);
+    $output = json_encode($results);
 } else {
-    echo json_encode([
+    $output = json_encode([
         'error_message' => 'There are no users in the table'
     ]);
 }

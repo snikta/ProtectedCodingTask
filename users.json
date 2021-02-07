@@ -1,0 +1,37 @@
+[
+    {
+        "firstName": "Homer J.",
+        "lastName": "Simpson",
+        "userName": "H.J.Simpson",
+        "darkMode": true,
+        "dateCreated": 1612712871
+    },
+    {
+        "firstName": "Lisa Marie",
+        "lastName": "Simpson",
+        "userName": "L.Simpson",
+        "darkMode": false,
+        "dateCreated": 1612712871
+    },
+    {
+        "firstName": "Neil Alden",
+        "lastName": "Armstrong",
+        "userName": "NA_armstrong",
+        "darkMode": false,
+        "dateCreated": 1612712871
+    },
+    {
+        "firstName": "Edwin \"Buzz\"",
+        "lastName": "Aldrin",
+        "userName": "the_real_buzz",
+        "darkMode": true,
+        "dateCreated": 1612712871
+    },
+    {
+        "firstName": "Margaret \"Maggie\"",
+        "lastName": "Simpson",
+        "userName": "maggie__simpson",
+        "darkMode": true,
+        "dateCreated": 1612712871
+    }
+]
