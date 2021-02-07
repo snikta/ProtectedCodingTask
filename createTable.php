@@ -8,6 +8,8 @@ if ($result && $result->num_rows) {
     $dbConn->conn->query($createTableQuery);
 }
 require_once('createUser.php');
+// get the prefilled user data from users.json
+// and populate the users table with these rows
 $usersToCreate = json_decode(file_get_contents('users.json'));
 foreach ($usersToCreate as $userData) {
     createUser((array) $userData, $dbConn);

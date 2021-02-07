@@ -7,9 +7,12 @@ if (!isset($_GET, $_GET['searchField'])) {
 } else {
     $searchField = $dbConn->conn->real_escape_string($_GET['searchField']);
     if ($searchField != 'firstName' && $searchField != 'lastName' && $searchField != 'userName') {
+        // firstName, lastName, and userName
+        // are the only valid search fields
         echo json_encode(['error_message' => 'No valid search field was provided']);
     } else {
         $query = $dbConn->conn->real_escape_string($_GET['query']);
+        // return rows of whom $query is a substring of $searchField
         $users = $dbConn->query('SELECT * FROM users WHERE ' . $searchField . ' LIKE \'%' . $query . '%\'');
         $results = [];
         $resultCount = $users->num_rows;

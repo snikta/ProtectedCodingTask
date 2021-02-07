@@ -1,10 +1,18 @@
 <?php
 require_once('databaseConnection.php');
+/* this function accepts input in an associative
+ * array called $requestData, and a reference to
+ * an active database connection called $dbConn
+ */
 function createUser($requestData, &$dbConn) {
+    /* at each point of failure, we either output
+     * an error message or continue with the next
+     * step */
     $ok_to_continue = false;
     if (!isset($requestData)) {
         echo json_encode(['error_message' => 'No data supplied']);
     } else {
+        /* check which fields were set */
         $supplied = [
             'firstName' => isset($requestData['firstName']),
             'lastName' => isset($requestData['lastName']),
@@ -37,6 +45,9 @@ function createUser($requestData, &$dbConn) {
             $fieldName = $dbConn->conn->real_escape_string($fieldName);
             $fieldType = $dbConn->getFieldType($fieldName);
             if ($fieldType == 'VARCHAR') {
+                // only consider a field blank if it is
+                // of type VARCHAR and is either empty or
+                // only consists of whitespace
                 if (preg_replace('/\s+/', '', $fieldValue) == '') {
                     $blankFields[] = $fieldName;
                 }
@@ -47,6 +58,8 @@ function createUser($requestData, &$dbConn) {
                 'error_message' => 'The following fields were left blank: ' . implode(', ', $blankFields)
             ]);
         } else {
+            // enforce length requirements for firstName,
+            // lastName, and userName
             $firstNameLength = strlen($requestData['firstName']);
             $lastNameLength = strlen($requestData['lastName']);
             $userNameLength = strlen($requestData['userName']);
@@ -66,6 +79,8 @@ function createUser($requestData, &$dbConn) {
                     'list_of_errors' => $errors
                 ]);
             } else {
+                // use a user-supplied timestamp if one exists;
+                // otherwise use the current system time (UNIX time)
                 $retval = $dbConn->insert('users', [
                     'firstName' => $requestData['firstName'],
                     'lastName' => $requestData['lastName'],
@@ -79,6 +94,7 @@ function createUser($requestData, &$dbConn) {
                         'success_message' => 'The new user record was created successfully'
                     ]);
                 } else {
+                    // report an error from mysqli
                     echo json_encode([
                         'error_message' => mysqli_error($dbConn->conn)
                     ]);

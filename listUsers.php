@@ -8,6 +8,7 @@ if ($resultCount) {
         $userData = [];
         foreach ($user as $fieldName => $fieldValue) {
             $fieldType = $dbConn->getFieldType($fieldName);
+            // coerce values to appropriate datatype
             switch ($fieldType) {
                 case 'VARCHAR':
                     $userData[$fieldName] = (string) $fieldValue;
