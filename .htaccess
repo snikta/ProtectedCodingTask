@@ -1,7 +1,7 @@
 RewriteEngine on
-RewriteRule "^users/byLastName\/([A-Za-z0-9]+)" "user.php?searchField=lastName&query=$1"
-RewriteRule "^users\/byFirstName\/([A-Za-z0-9]+)" "user.php?searchField=firstName&query=$1"
-RewriteRule "^users\/byUserName\/([A-Za-z0-9]+)" "user.php?searchField=userName&query=$1"
-RewriteRule "^users\/([0-9]+)\/toggleDarkMode" "user.php?id=$1"
-RewriteRule "^users\/([0-9]+)" "user.php?id=$1"
-RewriteRule "^users\/?$" "user.php"
+RewriteRule "^users\/byLastName\/([A-Za-z0-9]+)\/([A-Za-z0-9\+\/\=]+)" "user.php?searchField=lastName&query=$1&authToken=$2"
+RewriteRule "^users\/byFirstName\/([A-Za-z0-9]+)\/([A-Za-z0-9\+\/\=]+)" "user.php?searchField=firstName&query=$1&authToken=$2"
+RewriteRule "^users\/byUserName\/([A-Za-z0-9]+)\/([A-Za-z0-9\+\/\=]+)" "user.php?searchField=userName&query=$1&authToken=$2"
+RewriteRule "^users\/([0-9]+)\/toggleDarkMode\/([A-Za-z0-9\+\/\=]+)" "user.php?id=$1&authToken=$2"
+RewriteRule "^users\/([0-9]+)\/([A-Za-z0-9\+\/\=]+)" "user.php?id=$1&authToken=$2"
+RewriteRule "^users\/([A-Za-z0-9\+\/\=]+)$" "user.php?authToken=$1"

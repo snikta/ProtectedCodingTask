@@ -1,0 +1,9 @@
+curl -X GET http://localhost/ProtectedCodingTask/users/UHJvdGVjdGVkRG90TmV0MTIzIQ==
+curl -X GET http://localhost/ProtectedCodingTask/users/1/UHJvdGVjdGVkRG90TmV0MTIzIQ==
+curl -d authToken=UHJvdGVjdGVkRG90TmV0MTIzIQ== -d userName=hurricaneNeddy -d "firstName=Nedward 'Ned'" -d lastName=Flanders -d dateCreated=1612543165 -d darkMode=1 http://localhost/protectedcodingtask/users/UHJvdGVjdGVkRG90TmV0MTIzIQ==
+curl -X PUT -d authToken=UHJvdGVjdGVkRG90TmV0MTIzIQ== -d id=3 -d "firstName=C. Montgomery" -d lastName=Burns -d userName=MR.Burns http://localhost/ProtectedCodingTask/users/3/UHJvdGVjdGVkRG90TmV0MTIzIQ==
+curl -X DELETE -d confirm=yes http://localhost/ProtectedCodingTask/users/1/UHJvdGVjdGVkRG90TmV0MTIzIQ==
+curl -X PUT -d authToken=UHJvdGVjdGVkRG90TmV0MTIzIQ== -d id=5 http://localhost/ProtectedCodingTask/users/5/toggleDarkMode/UHJvdGVjdGVkRG90TmV0MTIzIQ==
+curl -X GET http://localhost/ProtectedCodingTask/users/byFirstName/Maggie/UHJvdGVjdGVkRG90TmV0MTIzIQ==
+curl -X GET http://localhost/ProtectedCodingTask/users/byLastName/Simpson/UHJvdGVjdGVkRG90TmV0MTIzIQ==
+curl -X GET http://localhost/ProtectedCodingTask/users/byUserName/Buzz/UHJvdGVjdGVkRG90TmV0MTIzIQ==

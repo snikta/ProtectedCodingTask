@@ -37,7 +37,7 @@ final class UserTest extends TestCase
     public function test_list_users() {
         $this->test_connect();
         $dbConn = &$this->testInstance;
-        $expectedUsers = json_decode(file_get_contents('prefilled.json'));
+        $expectedUsers = json_decode(file_get_contents('modified.json'));
         require_once('listUsers.php');
         $decodedOutput = json_decode($output);
         $i = 0;
@@ -103,7 +103,7 @@ final class UserTest extends TestCase
 
         $requestData = [
             'searchField' => 'userName',
-            'query' => 'NA_armstrong'
+            'query' => 'MR.Burns'
         ];
         list($output, $searchResultCount) = searchUsers($requestData, $dbConn);
         $this->assertTrue($searchResultCount > 0);
@@ -122,9 +122,9 @@ final class UserTest extends TestCase
         $dbConn = &$this->testInstance;
         $requestMethod = 'POST';
         $requestData = [
-            'firstName' => 'Lisa Marie',
+            'firstName' => 'Bartholomew J',
             'lastName' => 'Simpson',
-            'userName' => 'L.Simpson',
+            'userName' => 'BART_simpson',
             'darkMode' => 0,
             'dateCreated' => time()
         ];
@@ -138,7 +138,7 @@ final class UserTest extends TestCase
     public function test_update_user() {
         $this->test_connect();
         $dbConn = &$this->testInstance;
-        $id = 1;
+        $id = 5;
         $requestMethod = 'PUT';
         $requestData = [
             'id' => $id,
