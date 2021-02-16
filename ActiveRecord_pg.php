@@ -27,59 +27,59 @@ class DatabaseConnection {
 
 class Table {
     private $databaseInstance;
-    private $table_name;
-    public $column_types = [];
-    public $column_is_numeric = [];
+    private $tableName;
+    public $columnTypes = [];
+    public $columnIsNumeric = [];
 
-    function __construct($databaseInstance, $table_name) {
+    function __construct($databaseInstance, $tableName) {
         $this->databaseInstance = $databaseInstance;
-        $this->table_name = $this->databaseInstance->escape($table_name);
+        $this->tableName = $this->databaseInstance->escape($tableName);
 
-        $results = pg_query($this->databaseInstance->pdo, 'SELECT COLUMN_NAME, data_type FROM information_schema.COLUMNS WHERE table_schema = \'' . $this->databaseInstance->name . '\' AND table_name = \'' . $this->table_name . '\'');
+        $results = pg_query($this->databaseInstance->pdo, 'SELECT COLUMN_NAME, data_type FROM information_schema.COLUMNS WHERE table_schema = \'' . $this->databaseInstance->name . '\' AND table_name = \'' . $this->tableName . '\'');
         if ($results) {
             while ($result = pg_fetch_object($results)) {
-                $this->column_types[$result->column_name] = $result->data_type;
-                $this->column_is_numeric[$result->column_name] = array_search($result->data_type, NUMERIC_TYPES) !== false;
+                $this->columnTypes[$result->column_name] = $result->data_type;
+                $this->columnIsNumeric[$result->column_name] = array_search($result->data_type, NUMERIC_TYPES) !== false;
             }
         }
     }
 
     public function find($id) {
-        $result = pg_query($this->databaseInstance->pdo, 'SELECT * FROM ' . $this->databaseInstance->name. '.' . $this->table_name . ' WHERE id = ' . intval($id) . ' LIMIT 1');
+        $result = pg_query($this->databaseInstance->pdo, 'SELECT * FROM ' . $this->databaseInstance->name. '.' . $this->tableName . ' WHERE id = ' . intval($id) . ' LIMIT 1');
         if ($result && ($result = pg_fetch_object($results))) {
-            $record = new Record($this->databaseInstance, $this->table_name, mysqli_fetch_object($result));
+            $record = new Record($this->databaseInstance, $this->tableName, mysqli_fetch_object($result));
             return $record;
         }
         return false;
     }
 
     public function delete($where_params) {
-        return pg_query($this->databaseInstance->pdo, 'DELETE FROM ' . $this->databaseInstance->name . '.' . $this->table_name . ' WHERE ' . $this->get_where_params_sql($where_params));
+        return pg_query($this->databaseInstance->pdo, 'DELETE FROM ' . $this->databaseInstance->name . '.' . $this->tableName . ' WHERE ' . $this->getWhereParamsSql($where_params));
     }
 
-    private function get_where_params_sql($params) {
+    private function getWhereParamsSql($params) {
         $set = [];
-        foreach ($params as $field_name => $value) {
-            $sanitized_field_name = $this->databaseInstance->escape($field_name);
+        foreach ($params as $fieldName => $value) {
+            $sanitizedFieldName = $this->databaseInstance->escape($fieldName);
             if ($value === 'null' || $value === null) {
-                $set[] = $sanitized_field_name . ' IS NULL';
+                $set[] = $sanitizedFieldName . ' IS NULL';
             } else {
-                if ($this->databaseInstance->tables[$this->table_name]->column_is_numeric[$field_name]) {
-                    $set[] = $sanitized_field_name . ' = ' . $this->databaseInstance->escape($value) . '';
+                if ($this->databaseInstance->tables[$this->tableName]->columnIsNumeric[$fieldName]) {
+                    $set[] = $sanitizedFieldName . ' = ' . $this->databaseInstance->escape($value) . '';
                 } else {
-                    $set[] = $sanitized_field_name . ' = \'' . $this->databaseInstance->escape(utf8_encode($value)) . '\'';
+                    $set[] = $sanitizedFieldName . ' = \'' . $this->databaseInstance->escape(utf8_encode($value)) . '\'';
                 }
             }
         }
         return implode(' AND ', $set);
     }
 
-    public function where($params, $order_by = null, $count = false) {
-        $result = pg_query($this->databaseInstance->pdo, 'SELECT ' . ($count ? 'COUNT(1) AS count' : '*') . ' FROM ' . $this->databaseInstance->name. '.' . $this->table_name . ' WHERE ' . $this->get_where_params_sql($params) . ($order_by ? ' ORDER BY ' . $order_by : ''));
+    public function where($params, $orderBy = null, $count = false) {
+        $result = pg_query($this->databaseInstance->pdo, 'SELECT ' . ($count ? 'COUNT(1) AS count' : '*') . ' FROM ' . $this->databaseInstance->name. '.' . $this->tableName . ' WHERE ' . $this->getWhereParamsSql($params) . ($orderBy ? ' ORDER BY ' . $orderBy : ''));
         if ($result) {
             $results = [];
             while ($row = pg_fetch_object($result)) {
-                $results[] = new Record($this->databaseInstance, $this->table_name, $row);
+                $results[] = new Record($this->databaseInstance, $this->tableName, $row);
             }
             return $results;
         }
@@ -87,7 +87,7 @@ class Table {
     }
 
     public function getNextInsertId() {
-        $result = pg_query($this->databaseInstance->pdo, 'select nextval(pg_get_serial_sequence(\'' . $this->table_name . '\', \'id\'))');
+        $result = pg_query($this->databaseInstance->pdo, 'select nextval(pg_get_serial_sequence(\'' . $this->tableName . '\', \'id\'))');
         if ($result) {
             if ($result = pg_fetch_object($result)) {
                 return $result->nextval;
@@ -97,7 +97,7 @@ class Table {
     }
     
     public function getInsertId() {
-        $result = pg_query($this->databaseInstance->pdo, 'select currval(pg_get_serial_sequence(\'' . $this->table_name . '\', \'id\'))');
+        $result = pg_query($this->databaseInstance->pdo, 'select currval(pg_get_serial_sequence(\'' . $this->tableName . '\', \'id\'))');
         if ($result) {
             if ($result = pg_fetch_object($result)) {
                 return $result->currval;
@@ -109,14 +109,14 @@ class Table {
 
 class Record {
     private $databaseInstance;
-    private $table_name;
+    private $tableName;
     public $id = null;
     public $fields = [];
     public $data = [];
 
-    function __construct($databaseInstance, $table_name, $data = null) {
+    function __construct($databaseInstance, $tableName, $data = null) {
         $this->databaseInstance = $databaseInstance;
-        $this->table_name = $this->databaseInstance->escape($table_name);
+        $this->tableName = $this->databaseInstance->escape($tableName);
         if (isset($data)) {
             $this->data = $data;
             if (isset($data->id)) {
@@ -134,36 +134,36 @@ class Record {
         }
         if (isset($this->id)) {
             $set = [];
-            foreach ($this->data as $field_name => $value) {
-                $sanitized_field_name = $this->databaseInstance->escape($field_name);
+            foreach ($this->data as $fieldName => $value) {
+                $sanitizedFieldName = $this->databaseInstance->escape($fieldName);
                 if ($value === 'null' || $value === null) {
-                    $set[] = $sanitized_field_name . ' = null';
+                    $set[] = $sanitizedFieldName . ' = null';
                 } else {
-                    if ($this->databaseInstance->tables[$this->table_name]->column_is_numeric[$field_name]) {
-                        $set[] = $sanitized_field_name . ' = ' . $this->databaseInstance->escape($value) . '';
+                    if ($this->databaseInstance->tables[$this->tableName]->columnIsNumeric[$fieldName]) {
+                        $set[] = $sanitizedFieldName . ' = ' . $this->databaseInstance->escape($value) . '';
                     } else {
-                        $set[] = $sanitized_field_name . ' = \'' . $this->databaseInstance->escape(utf8_encode($value)) . '\'';
+                        $set[] = $sanitizedFieldName . ' = \'' . $this->databaseInstance->escape(utf8_encode($value)) . '\'';
                     }
                 }
             }
-            return pg_query($this->databaseInstance->pdo, 'UPDATE ' . $this->databaseInstance->name. '.' . $this->table_name . ' SET ' . implode(', ', $set) . ' WHERE id = ' . intval($this->id));
+            return pg_query($this->databaseInstance->pdo, 'UPDATE ' . $this->databaseInstance->name. '.' . $this->tableName . ' SET ' . implode(', ', $set) . ' WHERE id = ' . intval($this->id));
         } else {
-            $field_names = [];
+            $fieldNames = [];
             $values = [];
-            foreach ($this->data as $field_name => $value) {
-                $field_names[] = $this->databaseInstance->escape($field_name);
+            foreach ($this->data as $fieldName => $value) {
+                $fieldNames[] = $this->databaseInstance->escape($fieldName);
                 if ($value === null) {
                     $values[] = 'null';
                 } else {
                     $sanitized_value = $this->databaseInstance->escape($value);
-                    if ($this->databaseInstance->tables[$this->table_name]->column_is_numeric[$field_name]) {
+                    if ($this->databaseInstance->tables[$this->tableName]->columnIsNumeric[$fieldName]) {
                         $values[] = $sanitized_value;
                     } else {
                         $values[] = '\'' . $sanitized_value . '\'';
                     }
                 }
             }
-            return pg_query($this->databaseInstance->pdo, 'INSERT INTO ' . $this->databaseInstance->name. '.' . $this->table_name . ' (' . implode(', ', $field_names) . ') VALUES(' . implode(', ', $values) . ')');
+            return pg_query($this->databaseInstance->pdo, 'INSERT INTO ' . $this->databaseInstance->name. '.' . $this->tableName . ' (' . implode(', ', $fieldNames) . ') VALUES(' . implode(', ', $values) . ')');
         }
     }
 }
@@ -173,9 +173,9 @@ class Database {
     public $name;
     public $tables = [];
 
-    function __construct($pdo, $database_name = 'clnmg') {
+    function __construct($pdo, $databaseName = 'clnmg') {
         $this->pdo = $pdo;
-        $this->name = $this->escape($database_name);
+        $this->name = $this->escape($databaseName);
         $this->init_tables();
     }
 
@@ -184,11 +184,11 @@ class Database {
     }
 
     public function init_tables() {
-        $results = pg_query($this->pdo, 'SELECT TABLE_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = \'' . $this->name . '\' GROUP BY TABLE_NAME');
+        $results = pg_query($this->pdo, 'SELECT table_name FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = \'' . $this->name . '\' GROUP BY tableName');
         if ($results) {
             while ($result = pg_fetch_object($results)) {
-                $table_name = $result->table_name;
-                $this->tables[$table_name] = new Table($this, $table_name);
+                $tableName = $result->tableName;
+                $this->tables[$tableName] = new Table($this, $tableName);
             }
         }
     }

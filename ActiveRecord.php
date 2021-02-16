@@ -36,59 +36,59 @@ class DatabaseConnection {
 
 class Table {
     private $databaseInstance;
-    private $table_name;
-    public $column_types = [];
-    public $column_is_numeric = [];
+    private $tableName;
+    public $columnTypes = [];
+    public $columnIsNumeric = [];
 
-    function __construct($databaseInstance, $table_name) {
+    function __construct($databaseInstance, $tableName) {
         $this->databaseInstance = $databaseInstance;
-        $this->table_name = $this->databaseInstance->escape($table_name);
+        $this->tableName = $this->databaseInstance->escape($tableName);
 
-        $results = mysqli_query($this->databaseInstance->conn, 'SELECT COLUMN_NAME, data_type FROM information_schema.COLUMNS WHERE table_schema = \'' . $this->databaseInstance->name . '\' AND table_name = \'' . $this->table_name . '\'');
+        $results = mysqli_query($this->databaseInstance->conn, 'SELECT COLUMN_NAME, data_type FROM information_schema.COLUMNS WHERE table_schema = \'' . $this->databaseInstance->name . '\' AND table_name = \'' . $this->tableName . '\'');
         if ($results && mysqli_num_rows($results)) {
             foreach ($results as $result) {
-                $this->column_types[$result['COLUMN_NAME']] = $result['data_type'];
-                $this->column_is_numeric[$result['COLUMN_NAME']] = array_search($result['data_type'], NUMERIC_TYPES) !== false;
+                $this->columnTypes[$result['COLUMN_NAME']] = $result['data_type'];
+                $this->columnIsNumeric[$result['COLUMN_NAME']] = array_search($result['data_type'], NUMERIC_TYPES) !== false;
             }
         }
     }
 
     public function find($id) {
-        $result = mysqli_query($this->databaseInstance->conn, 'SELECT * FROM ' . $this->table_name . ' WHERE id = ' . intval($id) . ' LIMIT 1');
+        $result = mysqli_query($this->databaseInstance->conn, 'SELECT * FROM ' . $this->tableName . ' WHERE id = ' . intval($id) . ' LIMIT 1');
         if ($result && mysqli_num_rows($result)) {
-            $record = new Record($this->databaseInstance, $this->table_name, mysqli_fetch_object($result));
+            $record = new Record($this->databaseInstance, $this->tableName, mysqli_fetch_object($result));
             return $record;
         }
         return false;
     }
 
     public function delete($where_params) {
-        return mysqli_query($this->databaseInstance->conn, 'DELETE FROM ' . $this->table_name . ' WHERE ' . $this->get_where_params_sql($where_params));
+        return mysqli_query($this->databaseInstance->conn, 'DELETE FROM ' . $this->tableName . ' WHERE ' . $this->getWhereParamsSql($where_params));
     }
 
-    private function get_where_params_sql($params) {
+    private function getWhereParamsSql($params) {
         $set = [];
         foreach ($params as $field_name => $value) {
-            $sanitized_field_name = $this->databaseInstance->escape($field_name);
+            $sanitizedFieldName = $this->databaseInstance->escape($field_name);
             if ($value === 'null' || $value === null) {
-                $set[] = $sanitized_field_name . ' IS NULL';
+                $set[] = $sanitizedFieldName . ' IS NULL';
             } else {
-                if ($this->databaseInstance->tables[$this->table_name]->column_is_numeric[$field_name]) {
-                    $set[] = $sanitized_field_name . ' = ' . $this->databaseInstance->escape($value) . '';
+                if ($this->databaseInstance->tables[$this->tableName]->columnIsNumeric[$field_name]) {
+                    $set[] = $sanitizedFieldName . ' = ' . $this->databaseInstance->escape($value) . '';
                 } else {
-                    $set[] = $sanitized_field_name . ' = \'' . $this->databaseInstance->escape(utf8_encode($value)) . '\'';
+                    $set[] = $sanitizedFieldName . ' = \'' . $this->databaseInstance->escape(utf8_encode($value)) . '\'';
                 }
             }
         }
         return implode(' AND ', $set);
     }
 
-    public function where($params, $order_by = null, $count = false) {
-        $result = mysqli_query($this->databaseInstance->conn, 'SELECT ' . ($count ? 'COUNT(1) AS count' : '*') . ' FROM ' . $this->table_name . ' WHERE ' . $this->get_where_params_sql($params) . ($order_by ? ' ORDER BY ' . $order_by : ''));
-        if ($result && ($result_count = mysqli_num_rows($result))) {
+    public function where($params, $orderBy = null, $count = false) {
+        $result = mysqli_query($this->databaseInstance->conn, 'SELECT ' . ($count ? 'COUNT(1) AS count' : '*') . ' FROM ' . $this->tableName . ' WHERE ' . $this->getWhereParamsSql($params) . ($orderBy ? ' ORDER BY ' . $orderBy : ''));
+        if ($result && ($resultCount = mysqli_num_rows($result))) {
             $results = [];
-            for ($i = 0, $len = $result_count; $i < $len; $i++) {
-                $results[] = new Record($this->databaseInstance, $this->table_name, mysqli_fetch_object($result));
+            for ($i = 0, $len = $resultCount; $i < $len; $i++) {
+                $results[] = new Record($this->databaseInstance, $this->tableName, mysqli_fetch_object($result));
             }
             return $results;
         }
@@ -96,7 +96,7 @@ class Table {
     }
 
     public function getNextInsertId() {
-		$result = mysqli_query($this->databaseInstance->conn, 'SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_NAME = \'' . $this->table_name . '\' AND TABLE_SCHEMA = \'' . $this->databaseInstance->name . '\'');
+		$result = mysqli_query($this->databaseInstance->conn, 'SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE table_name = \'' . $this->tableName . '\' AND TABLE_SCHEMA = \'' . $this->databaseInstance->name . '\'');
 		if ($result && mysqli_num_rows($result)) {
             if ($result = mysqli_fetch_object($result)) {
                 return $result->AUTO_INCREMENT;
@@ -108,14 +108,14 @@ class Table {
 
 class Record {
     private $databaseInstance;
-    private $table_name;
+    private $tableName;
     public $id = null;
     public $fields = [];
     public $data = [];
 
-    function __construct($databaseInstance, $table_name, $data = null) {
+    function __construct($databaseInstance, $tableName, $data = null) {
         $this->databaseInstance = $databaseInstance;
-        $this->table_name = $this->databaseInstance->escape($table_name);
+        $this->tableName = $this->databaseInstance->escape($tableName);
         if (isset($data)) {
             $this->data = $data;
             if (isset($data->id)) {
@@ -134,18 +134,18 @@ class Record {
         if (isset($this->id)) {
             $set = [];
             foreach ($this->data as $field_name => $value) {
-                $sanitized_field_name = $this->databaseInstance->escape($field_name);
+                $sanitizedFieldName = $this->databaseInstance->escape($field_name);
                 if ($value === 'null' || $value === null) {
-                    $set[] = $sanitized_field_name . ' = null';
+                    $set[] = $sanitizedFieldName . ' = null';
                 } else {
-                    if ($this->databaseInstance->tables[$this->table_name]->column_is_numeric[$field_name]) {
-                        $set[] = $sanitized_field_name . ' = ' . $this->databaseInstance->escape($value) . '';
+                    if ($this->databaseInstance->tables[$this->tableName]->columnIsNumeric[$field_name]) {
+                        $set[] = $sanitizedFieldName . ' = ' . $this->databaseInstance->escape($value) . '';
                     } else {
-                        $set[] = $sanitized_field_name . ' = \'' . $this->databaseInstance->escape(utf8_encode($value)) . '\'';
+                        $set[] = $sanitizedFieldName . ' = \'' . $this->databaseInstance->escape(utf8_encode($value)) . '\'';
                     }
                 }
             }
-            return mysqli_query($this->databaseInstance->conn, 'UPDATE ' . $this->table_name . ' SET ' . implode(', ', $set) . ' WHERE id = ' . intval($this->id));
+            return mysqli_query($this->databaseInstance->conn, 'UPDATE ' . $this->tableName . ' SET ' . implode(', ', $set) . ' WHERE id = ' . intval($this->id));
         } else {
             $field_names = ['id'];
             $values = [$this->id === null ? 'null' : intval($this->id)];
@@ -155,14 +155,14 @@ class Record {
                     $values[] = 'null';
                 } else {
                     $sanitized_value = $this->databaseInstance->escape($value);
-                    if ($this->databaseInstance->tables[$this->table_name]->column_is_numeric[$field_name]) {
+                    if ($this->databaseInstance->tables[$this->tableName]->columnIsNumeric[$field_name]) {
                         $values[] = $sanitized_value;
                     } else {
                         $values[] = '\'' . $sanitized_value . '\'';
                     }
                 }
             }
-            return mysqli_query($this->databaseInstance->conn, 'INSERT INTO ' . $this->table_name . ' (' . implode(', ', $field_names) . ') VALUES(' . implode(', ', $values) . ')'); 
+            return mysqli_query($this->databaseInstance->conn, 'INSERT INTO ' . $this->tableName . ' (' . implode(', ', $field_names) . ') VALUES(' . implode(', ', $values) . ')'); 
         }
     }
 }
@@ -172,23 +172,23 @@ class Database {
     public $name;
     public $tables = [];
 
-    function __construct($conn, $database_name) {
+    function __construct($conn, $databaseName) {
         $this->conn = $conn;
-        $this->name = $this->escape($database_name);
+        $this->name = $this->escape($databaseName);
         mysqli_select_db($this->conn, $this->name);
-        $this->init_tables();
+        $this->initTables();
     }
     
     public function escape($str) {
         return mysqli_real_escape_string($this->conn, $str);
     }
 
-    public function init_tables() {
-        $results = mysqli_query($this->conn, 'SELECT TABLE_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = \'' . $this->name . '\'');
+    public function initTables() {
+        $results = mysqli_query($this->conn, 'SELECT table_name FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = \'' . $this->name . '\'');
         if ($results && mysqli_num_rows($results)) {
             foreach ($results as $result) {
-                $table_name = $result['TABLE_NAME'];
-                $this->tables[$table_name] = new Table($this, $table_name);
+                $tableName = $result['tableName'];
+                $this->tables[$tableName] = new Table($this, $tableName);
             }
         }
     }
