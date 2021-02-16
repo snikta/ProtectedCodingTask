@@ -35,7 +35,7 @@ class Table {
         $this->databaseInstance = $databaseInstance;
         $this->tableName = $this->databaseInstance->escape($tableName);
 
-        $results = pg_query($this->databaseInstance->pdo, 'SELECT COLUMN_NAME, data_type FROM information_schema.COLUMNS WHERE table_schema = \'' . $this->databaseInstance->name . '\' AND table_name = \'' . $this->tableName . '\'');
+        $results = pg_query($this->databaseInstance->pdo, 'SELECT COLUMN_NAME, data_type FROM information_schema.COLUMNS WHERE table_schema = \'' . $this->databaseInstance->name . '\' AND TABLE_NAME = \'' . $this->tableName . '\'');
         if ($results) {
             while ($result = pg_fetch_object($results)) {
                 $this->columnTypes[$result->column_name] = $result->data_type;
@@ -53,8 +53,8 @@ class Table {
         return false;
     }
 
-    public function delete($where_params) {
-        return pg_query($this->databaseInstance->pdo, 'DELETE FROM ' . $this->databaseInstance->name . '.' . $this->tableName . ' WHERE ' . $this->getWhereParamsSql($where_params));
+    public function delete($whereParams) {
+        return pg_query($this->databaseInstance->pdo, 'DELETE FROM ' . $this->databaseInstance->name . '.' . $this->tableName . ' WHERE ' . $this->getWhereParamsSql($whereParams));
     }
 
     private function getWhereParamsSql($params) {
@@ -173,18 +173,18 @@ class Database {
     public $name;
     public $tables = [];
 
-    function __construct($pdo, $databaseName = 'clnmg') {
+    function __construct($pdo, $databaseName) {
         $this->pdo = $pdo;
         $this->name = $this->escape($databaseName);
-        $this->init_tables();
+        $this->initTables();
     }
 
     public function escape($str) {
         return pg_escape_string($this->pdo, $str);
     }
 
-    public function init_tables() {
-        $results = pg_query($this->pdo, 'SELECT table_name FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = \'' . $this->name . '\' GROUP BY tableName');
+    public function initTables() {
+        $results = pg_query($this->pdo, 'SELECT TABLE_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = \'' . $this->name . '\' GROUP BY TABLE_NAME');
         if ($results) {
             while ($result = pg_fetch_object($results)) {
                 $tableName = $result->tableName;

@@ -96,7 +96,7 @@ class Table {
     }
 
     public function getNextInsertId() {
-		$result = mysqli_query($this->databaseInstance->conn, 'SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE table_name = \'' . $this->tableName . '\' AND TABLE_SCHEMA = \'' . $this->databaseInstance->name . '\'');
+		$result = mysqli_query($this->databaseInstance->conn, 'SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_NAME = \'' . $this->tableName . '\' AND TABLE_SCHEMA = \'' . $this->databaseInstance->name . '\'');
 		if ($result && mysqli_num_rows($result)) {
             if ($result = mysqli_fetch_object($result)) {
                 return $result->AUTO_INCREMENT;
@@ -184,10 +184,10 @@ class Database {
     }
 
     public function initTables() {
-        $results = mysqli_query($this->conn, 'SELECT table_name FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = \'' . $this->name . '\'');
+        $results = mysqli_query($this->conn, 'SELECT TABLE_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = \'' . $this->name . '\'');
         if ($results && mysqli_num_rows($results)) {
             foreach ($results as $result) {
-                $tableName = $result['tableName'];
+                $tableName = $result['TABLE_NAME'];
                 $this->tables[$tableName] = new Table($this, $tableName);
             }
         }
